@@ -1,6 +1,10 @@
 #include <M5Atom.h>
+#include <M5AtomDisplay.h>
 
 #include "common.h"
+
+M5AtomDisplay display;  // 1280 x 720
+// M5AtomDisplay display(480, 1920); // ツイ廃液晶
 
 const CRGB CRGB_STARTED(0xff, 0xff, 0xff);
 const CRGB CRGB_CONNECTING(0x0, 0xff, 0xff);
@@ -141,6 +145,24 @@ void setup(void) {
     M5.begin(ENABLE_SERIAL, ENABLE_I2C, ENABLE_DISPLAY);
     M5.dis.fillpix(CRGB_CONNECTING);
 
+    display.init();
+    display.setRotation(0);
+    display.setColorDepth(24);
+
+    display.startWrite();
+    for (int y = 0; y < display.height(); ++y) {
+        for (int x = 0; x < display.width(); ++x) {
+            display.writePixel(x, y, display.color888(x, x + y, y));
+        }
+    }
+    display.endWrite();
+
+    for (int i = 0; i < 16; ++i) {
+        int x = rand() % display.width();
+        int y = rand() % display.height();
+        display.drawCircle(x, y, 16, rand());
+    }
+
 #if defined(ENABLE_WIFI) && !defined(ENABLE_MQTT)
     if (wifiController.begin(WIFI_NVS_CONFIG_PATH, connectingWiFiCallback)) {
         M5.dis.fillpix(CRGB_CONNECTED);
@@ -181,6 +203,21 @@ void setup(void) {
 
 void loop(void) {
     M5.update();
+
+    display.startWrite();
+    for (int y = 0; y < display.height(); ++y) {
+        for (int x = 0; x < display.width(); ++x) {
+            display.writePixel(x, y, display.color888(x, x + y, y));
+        }
+    }
+    display.endWrite();
+
+    for (int i = 0; i < 16; ++i) {
+        int x = rand() % display.width();
+        int y = rand() % display.height();
+        display.drawCircle(x, y, 16, rand());
+    }
+
 #ifdef ENABLE_WIFI
     wifiController.update();
 #endif
